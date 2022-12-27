@@ -6,20 +6,40 @@ import (
 	"time"
 )
 
-func askStdnInput(min, max int) int {
+func askStdnInput(min, max int) (int, bool) {
 	// Read the input from stdin (terminal)
 	fmt.Print("Enter a number: ")
 	var input int
 	_, err := fmt.Scan(&input)
 	if err != nil {
-		fmt.Println("Error reading input")
-		return 0
+		fmt.Println("Input is not a number, try again")
+		return input, false
 	}
 
 	if input < min || input > max {
 		fmt.Println("Input is out of range, it should be between 1-100")
-		return 0
+		return input, false
 	}
+	return input, true
+}
+
+func getOnlyIntFromStdin(min, max int) int {
+	// Read the input from stdin (terminal)
+	fmt.Print("Enter a number: ")
+
+	var input int
+	_, err := fmt.Scan(&input)
+
+	if input < min || input > max {
+		fmt.Println("Input is out of range, it should be between 1-100")
+		return getOnlyIntFromStdin(min, max)
+	}
+
+	if err != nil {
+		fmt.Println("Input is not a number, try again")
+		return getOnlyIntFromStdin(min, max)
+	}
+
 	return input
 }
 
@@ -28,17 +48,15 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	secret := rand.Intn(100)
 
-	// TODO: Handle the Attempt issue for out of range input cases
-
 	// Print the secret number
 	fmt.Println(secret)
 
 	// Store a attempts counter
-	attempt := 10
+	attempt := 9
 
-	for attempt > 0 {
+	for attempt >= 0 {
 
-		input := askStdnInput(1, 100)
+		input := getOnlyIntFromStdin(1, 100)
 
 		// // if the Input is less than the secret number -> print "Input is too low"
 
@@ -52,26 +70,33 @@ func main() {
 		// 	fmt.Printf("You guessed the number %d in %d attempts \n", secret, attempt)
 		// 	return
 		// }
+		if attempt == 0 {
+			fmt.Println("You have exhausted all your attempts, the secret number was ", secret)
+			return
+		}
 
 		// Use switch case
+
 		switch {
 		case input < secret:
 			{
-				fmt.Printf("Input is too Low (attempts left: %d), try again \n", attempt-1)
+				fmt.Printf("Input is too Low (attempts left: %d), try again \n", attempt)
 			}
 		case input > secret:
 			{
-				fmt.Printf("Input is too High (attempts left: %d), try again \n", attempt-1)
+				fmt.Printf("Input is too High (attempts left: %d), try again \n", attempt)
 			}
 		default:
 			{
-				fmt.Printf("You guessed the number %d in %d attempts \n", secret, attempt-1)
+				fmt.Printf("You guessed the number %d in %d attempts \n", secret, attempt)
 				return
 			}
 		}
 
 		// Reduce the attempts counter
+
 		attempt--
+
 	}
 
 	// Need to handle some edge cases
